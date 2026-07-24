@@ -7,14 +7,12 @@ const generateTrip = async (req, res) => {
   try {
     const { source, destination, duration, budget, interests } = req.body;
 
-    // Basic validation
     if (!source || !destination || !duration || !budget) {
       return res.status(400).json({
         message: 'Please provide source, destination, duration, and budget',
       });
     }
 
-    // Call Gemini to generate the trip plan
     const tripData = await generateTripPlan({
       source,
       destination,
@@ -23,7 +21,6 @@ const generateTrip = async (req, res) => {
       interests: interests || [],
     });
 
-    // Save the trip to MongoDB, linked to the logged-in user
     const trip = await Trip.create({
       user: req.user._id,
       source,
@@ -44,4 +41,25 @@ const generateTrip = async (req, res) => {
   }
 };
 
-module.exports = { generateTrip };
+// @desc    Get a single trip by ID (only if it belongs to the logged-in user)
+// @route   GET /api/trips/:id
+const getTripById = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+
+    if (!trip) {
+      return res.status(404).json({ message: 'Trip not found' });
+    }
+
+    // Security check: make sure this trip belongs to the logged-in user
+    if (trip.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to view this trip' });
+    }
+
+    res.status(200).json(trip);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { generateTrip, getTripById };
