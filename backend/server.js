@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 const healthRoutes = require('./routes/healthRoutes');
 const authRoutes = require('./routes/authRoutes');
 const tripRoutes = require('./routes/tripRoutes');
+const geocodeRoutes = require('./routes/geocodeRoutes');
 
 // Connect to MongoDB
 connectDB();
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/trips', tripRoutes);
+app.use('/api/geocode', geocodeRoutes);
 
 // Test route
 app.get('/', (req, res) => {
